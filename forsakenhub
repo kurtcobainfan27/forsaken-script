@@ -82,6 +82,35 @@ library:CreateWindow({
     end 
     local Timer = 0 
     local Delay = 5 
+    
+    local AutoGenThread
+    
+    local function StartAutoGen()
+        if AutoGenThread and coroutine.status(AutoGenThread) ~= "dead" then
+            coroutine.yield(AutoGenThread)
+        end
+        AutoGenThread = task.spawn(function()
+            while ActiveAutoGenerator do
+                local map = Game.Workspace.Map.Ingame:FindFirstChild("Map") 
+                if map then 
+                    for _, Players in pairs(map:GetChildren()) do 
+                        if Players:IsA("Model") and Players.Name == "Generator" then 
+                            local remoteFolder = Players:FindFirstChild("Remotes") 
+                            if remoteFolder then 
+                                local RE = remoteFolder:FindFirstChild("RE") 
+                                if RE then 
+                                    RE:FireServer() 
+                                    task.wait(0.1) 
+                                end 
+                            end 
+                        end 
+                    end 
+                end 
+                task.wait(Delay) 
+            end
+        end)
+    end
+    
     RunService.RenderStepped:Connect(function(dt) 
         task.spawn(function() 
             local updatedInfo = getServerInfo() 
@@ -185,30 +214,8 @@ library:CreateWindow({
             m.StaminaLossDisabled = true 
             m.Stamina = 9999999 
         end 
-        task.spawn(function() 
-            if ActiveAutoGenerator then 
-                if CanAutoGenFixGlitchs then 
-                    Timer += dt 
-                    if Timer < Delay then return end 
-                    Timer = 0 
-                    CanAutoGenFixGlitchs = false 
-                    local map = Game.Workspace.Map.Ingame:FindFirstChild("Map") 
-                    if map then 
-                        for _, Players in pairs(map:GetChildren()) do 
-                            if Players:IsA("Model") and Players.Name == "Generator" then 
-                                local remoteFolder = Players:FindFirstChild("Remotes") 
-                                if remoteFolder then 
-                                    local RE = remoteFolder:FindFirstChild("RE") 
-                                    if RE then RE:FireServer() end 
-                                end 
-                            end 
-                        end 
-                    end 
-                end 
-                CanAutoGenFixGlitchs = true 
-            end 
-        end) 
     end) 
+    
     local function CreateEsp(Char, Color, Text, Parent,Num) 
         if not Char or not Parent then return end 
         if Char:FindFirstChild("ESP") and Char:FindFirstChildOfClass("Highlight") then return end 
@@ -434,7 +441,10 @@ library:CreateWindow({
         Flag = "ButtonAutoGen", 
         -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps 
         Callback = function(Value) 
-            ActiveAutoGenerator = Value 
+            ActiveAutoGenerator = Value
+            if ActiveAutoGenerator then
+                StartAutoGen()
+            end
         end, 
     }) 
     local PlayerActiveInfStaminaToggle = PlayerTab:AddToggle({
