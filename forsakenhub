@@ -86,7 +86,7 @@ MaxPlayers =maxPlayers
 	}
 end
 local Timer = 0
-local Delay = math.random(3, 5)
+local Delay = 5
 RunService.RenderStepped:Connect(function(dt)
 task.spawn(function()
 	local updatedInfo = getServerInfo()
