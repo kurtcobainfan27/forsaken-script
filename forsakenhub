@@ -81,7 +81,7 @@ library:CreateWindow({
         } 
     end 
     local Timer = 0 
-    local Delay = 5 
+    local Delay = 3.25 
     
     local AutoGenThread
     
@@ -435,7 +435,7 @@ library:CreateWindow({
         end, 
     }) 
     local PlayerActiveAutoGeneratorToggle = PlayerTab:AddToggle({
-        Text = "Auto Generator(Every 5 seconds)", 
+        Text = "Auto Generator(Every 3.25 seconds)", 
         Name = "PlayerActiveAutoGeneratorToggle", 
         CurrentValue = false, 
         Flag = "ButtonAutoGen", 
